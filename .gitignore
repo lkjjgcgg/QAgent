@@ -16,15 +16,18 @@ logs/*
 !logs/*/
 logs/*/*
 !logs/*/.gitkeep
+# 本地工具（如 CI 本地仿真脚本）在仓库根目录产生的运行日志
+/*.log
 # 忽略.env配置文件(但保留.env.example示例文件)
 .env
 .sql
 static_files/img/
 .bak
-# 忽略所有 app/*/migrations/ 目录下的所有内容 (包括文件和子目录)
-apps/*/migrations/*
-# 使用否定模式，例外地跟踪 __init__.py 文件
-!apps/*/migrations/__init__.py
+# ⚠️ Django 迁移文件【必须】纳入版本控制（官方推荐做法），不要在此忽略。
+# 迁移文件是数据库 schema 的"版本历史"，一旦忽略会导致：
+#   1. 新克隆的仓库执行 migrate 时建不出表，项目直接跑不起来
+#   2. 多人协作时各自生成迁移，版本号冲突且无法合并
+# 因此这里保留 apps/*/migrations/ 下的所有 .py 文件。
 
 # 忽略 allure-static 下的所有文件（运行时生成）
 media/allure-static/*
@@ -74,3 +77,7 @@ CLAUDE.md
 .trae/
 .claude
 .codebuddy
+
+# ---- pytest / Allure 测试产物（每次运行都会变，是产物不是源码）----
+allure-results/
+allure-report/
