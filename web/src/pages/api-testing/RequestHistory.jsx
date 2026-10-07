@@ -172,7 +172,10 @@ const RequestHistory = () => {
 
   const handleRetry = async (record) => {
     try {
-      await retryRequest(record.id, record.environment);
+      // 【为什么取 .id】接口返回的 environment 是**嵌套对象**（EnvironmentSerializer），
+      // 不是 id。原先直接把整个对象当 environment_id 发出去，后端拿到的是个 dict，
+      // 注定匹配不上。这里只取 id；没有环境就传 null，由后端回退到该条历史用的环境。
+      await retryRequest(record.id, record.environment?.id ?? null);
       message.success('重试成功');
       loadHistories();
     } catch (error) {

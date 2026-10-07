@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 from .utils import execute_assertions
 from .operation_logger import log_operation
-from .variable_resolver import VariableResolver
+from apps.core.variable_resolver import VariableResolver
 from .serializers import (
     ApiProjectSerializer, ApiCollectionSerializer, ApiRequestSerializer,
     EnvironmentSerializer, RequestHistorySerializer, TestSuiteSerializer,
@@ -655,6 +655,47 @@ class RequestHistoryViewSet(viewsets.ModelViewSet):
         deleted_count, _ = RequestHistory.objects.filter(id__in=valid_ids).delete()
         
         return Response({'message': f'成功删除 {deleted_count} 条记录'})
+
+    @action(detail=True, methods=['post'])
+    def retry(self, request, pk=None):
+        """重试：按这条历史记录重新执行一次原始请求。
+
+        【为什么需要补这个方法】
+        前端「请求历史」页的「重试」按钮一直在调
+        POST /api/api-testing/histories/{id}/retry/，但后端从来没有这个动作，
+        点下去只会拿到 404，页面固定弹「重试失败」—— 前端在调、后端没有，
+        这是一条断链。
+
+        【为什么不自己写一套发请求的逻辑】
+        本 app 的 utils.execute_api_request() 已经把「解析环境变量与动态函数
+        → 发请求 → 执行断言 → 写一条 RequestHistory」整条链路封装好了，
+        定时任务（_execute_api_request）用的就是它。这里直接复用，
+        既避免重复实现，也天然保证「重试」与「正常执行」的行为完全一致。
+
+        【为什么用 get_queryset() 取对象】
+        get_queryset() 已经按「项目 owner / members」过滤过，
+        所以越权重试别人的记录会直接 404，无需再单独写权限判断
+        （与 users 模块修 IDOR 时的思路一致）。
+
+        【为什么新建记录而不是原地覆盖】
+        请求历史是一份只追加的流水账。重试产生的结果是「一次新的执行」，
+        应当新增一条记录，而不是把旧记录改掉——否则历史就失真了。
+        """
+        history = get_object_or_404(self.get_queryset(), pk=pk)
+
+        # 环境优先级：请求体显式指定 > 这条历史当时使用的环境。
+        # 前端传的是嵌套对象里的 id，也有传 null 的情况，故这里对空值做兜底。
+        environment = history.environment
+        environment_id = request.data.get('environment_id')
+        if environment_id:
+            environment = get_object_or_404(Environment, pk=environment_id)
+
+        from .utils import execute_api_request
+
+        result = execute_api_request(history.request, environment, request.user)
+        if not result.get('success'):
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result)
 
 
 class TestSuiteViewSet(viewsets.ModelViewSet):

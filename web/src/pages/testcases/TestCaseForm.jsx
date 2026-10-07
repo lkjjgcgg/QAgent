@@ -63,8 +63,13 @@ const TestCaseForm = () => {
         setVersions([]);
         return;
       }
-      const response = await api.get(`/projects/${projectId}/versions/`);
-      setVersions(response.data.results || []);
+      // 【两个都改】
+      // 1) 路径：版本接口挂在 versions 这个 app 下，是 /versions/projects/{id}/versions/，
+      //    原来写的 /projects/{id}/versions/ 后端根本没有，必然 404。
+      // 2) 取值：该接口是函数视图、**不走分页**，返回的是普通数组而不是 {results: [...]}，
+      //    所以原来只取 .results 会永远拿到 undefined。这里两种形状都兼容。
+      const response = await api.get(`/versions/projects/${projectId}/versions/`);
+      setVersions(response.data.results || response.data || []);
     } catch (error) {
       console.error('Failed to load versions:', error);
     }

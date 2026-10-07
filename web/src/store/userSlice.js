@@ -4,7 +4,11 @@ import api from '../services/api';
 // 异步action
 const fetchUser = createAsyncThunk('user/fetchUser', async (_, { rejectWithValue }) => {
   try {
-    const response = await api.get('/users/me/');
+    // 【原路径是 /users/me/，后端没有这条路】
+    // 后端「当前用户」接口挂在 apps/users/urls.py 的 me/ 上，而这个 urls 被
+    // include 在 /api/auth/ 下，所以正确路径是 /api/auth/me/。
+    // 原来那条会 404，而本 thunk 的 rejected 分支会清 token 把人踢下线。
+    const response = await api.get('/auth/me/');
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response?.data || error.message);
@@ -44,12 +48,16 @@ const userSlice = createSlice({
     let user = null;
     try {
       user = userStr ? JSON.parse(userStr) : null;
-    } catch (e) {
+    } catch {
+      // localStorage 里的内容可能被手动改坏（或旧版本残留），解析失败就当作未登录
       user = null;
     }
 
-    // 检查token是否过期
-    const isTokenValid = accessToken && tokenExpiresAt > Date.now();
+    // 检查token是否过期。
+    // 外层的 Boolean() 不是多余的：accessToken 为空字符串时，&& 会短路并直接返回 ''
+    // （而不是 false），那样 isAuthenticated 的类型就在 boolean / string 之间飘忽。
+    // 虽然 '' 同样是 falsy、现有判断不受影响，但类型不一致迟早会在别处埋雷。
+    const isTokenValid = Boolean(accessToken && tokenExpiresAt > Date.now());
 
     return {
       user,
