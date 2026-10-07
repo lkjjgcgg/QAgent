@@ -25,7 +25,6 @@ urlpatterns = [
     path('api/reviews/', include('apps.reviews.urls')),
     path('api/versions/', include('apps.versions.urls')),
     path('api/assistant/', include('apps.assistant.urls')),
-    path('api/users/', include('apps.users.urls')),
     path('api/requirement-analysis/', include('apps.requirement_analysis.urls')),
     path('api/', include('apps.api_testing.urls')),
     path('api/core/', include('apps.core.urls')),

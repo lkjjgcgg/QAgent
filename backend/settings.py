@@ -29,13 +29,11 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
-    'rest_framework.authtoken',
-    'rest_framework_simplejwt',  # 添加JWT支持
+    'rest_framework_simplejwt',  # JWT 认证（项目统一使用 JWT）
     'rest_framework_simplejwt.token_blacklist',  # JWT token黑名单
     'corsheaders',
     'django_filters',
     'drf_spectacular',
-    'channels',
 ]
 
 LOCAL_APPS = [
@@ -142,8 +140,8 @@ AUTH_USER_MODEL = 'users.User'
 # DRF Settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT认证（优先）
-        'rest_framework.authentication.TokenAuthentication',  # 保留Token认证（兼容）
+        # 统一使用 JWT（原并存的 DRF Token 认证已移除，见 apps/users/views.py）
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -273,21 +271,6 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Test Case Management Platform API',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-}
-
-# Celery Configuration
-CELERY_BROKER_URL = config('REDIS_URL', default='redis://:1234@127.0.0.1:6379/0')
-CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://:1234@127.0.0.1:6379/0')
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-
-# Channels Configuration
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [config('REDIS_URL', default='redis://:1234@127.0.0.1:6379/0')],
-        },
-    },
 }
 
 # Cache Configuration
