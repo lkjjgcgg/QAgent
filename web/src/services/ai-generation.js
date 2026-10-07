@@ -92,159 +92,6 @@ export const createTestCase = async (data) => {
   }
 };
 
-// 评审相关
-export const getTestCaseReviews = async (params = {}) => {
-  try {
-    const response = await api.get('/reviews/', { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get test case reviews:', error);
-    throw error;
-  }
-};
-
-// 测试套件相关
-export const getTestSuites = async (params = {}) => {
-  try {
-    const response = await api.get('/testsuites/', { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get test suites:', error);
-    throw error;
-  }
-};
-
-// 测试执行相关
-export const getTestExecutions = async (params = {}) => {
-  try {
-    const response = await api.get('/executions/', { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get test executions:', error);
-    throw error;
-  }
-};
-
-// 测试报告相关
-export const getTestReports = async (params = {}) => {
-  try {
-    const response = await api.get('/reports/', { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get test reports:', error);
-    throw error;
-  }
-};
-
-// 需求文档相关
-export const uploadRequirementDocument = async (formData) => {
-  try {
-    const response = await api.post('/requirement-analysis/upload/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    return response;
-  } catch (error) {
-    console.error('Failed to upload requirement document:', error);
-    throw error;
-  }
-};
-
-export const analyzeRequirement = async (data) => {
-  try {
-    const response = await api.post('/requirement-analysis/analyze/', data);
-    return response;
-  } catch (error) {
-    console.error('Failed to analyze requirement:', error);
-    throw error;
-  }
-};
-
-export const generateTestCases = async (data) => {
-  try {
-    const response = await api.post('/requirement-analysis/generate/', data);
-    return response;
-  } catch (error) {
-    console.error('Failed to generate test cases:', error);
-    throw error;
-  }
-};
-
-export const getAnalysisHistory = async (params = {}) => {
-  try {
-    const response = await api.get('/requirement-analysis/history/', { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get analysis history:', error);
-    throw error;
-  }
-};
-
-export const getAnalysisDetail = async (id) => {
-  try {
-    const response = await api.get(`/requirement-analysis/history/${id}/`);
-    return response;
-  } catch (error) {
-    console.error('Failed to get analysis detail:', error);
-    throw error;
-  }
-};
-
-// AI生成的测试用例相关
-export const getGeneratedTestCases = async (params = {}) => {
-  try {
-    const response = await api.get('/requirement-analysis/generated-cases/', { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get generated test cases:', error);
-    throw error;
-  }
-};
-
-// 用例评审相关
-export const getReviewCases = async (params = {}) => {
-  try {
-    const response = await api.get('/requirement-analysis/review-cases/', { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get review cases:', error);
-    throw error;
-  }
-};
-
-export const submitReview = async (data) => {
-  try {
-    const response = await api.post('/requirement-analysis/submit-review/', data);
-    return response;
-  } catch (error) {
-    console.error('Failed to submit review:', error);
-    throw error;
-  }
-};
-
-// 评审模板相关
-export const getReviewTemplates = async (params = {}) => {
-  try {
-    const response = await api.get('/requirement-analysis/review-templates/', { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get review templates:', error);
-    throw error;
-  }
-};
-
-// 版本管理相关
-export const getCaseVersions = async (caseId, params = {}) => {
-  try {
-    const response = await api.get(`/requirement-analysis/case-versions/${caseId}/`, { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get case versions:', error);
-    throw error;
-  }
-};
-
 // AI模型配置
 export const getAIModelConfigs = async (params = {}) => {
   try {
@@ -296,47 +143,6 @@ export const testAIModelConnection = async (id) => {
   }
 };
 
-// 提示词配置
-export const getPromptConfigs = async (params = {}) => {
-  try {
-    const response = await api.get('/requirement-analysis/prompts/', { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get prompt configs:', error);
-    throw error;
-  }
-};
-
-export const createPromptConfig = async (data) => {
-  try {
-    const response = await api.post('/requirement-analysis/prompts/', data);
-    return response;
-  } catch (error) {
-    console.error('Failed to create prompt config:', error);
-    throw error;
-  }
-};
-
-export const updatePromptConfig = async (id, data) => {
-  try {
-    const response = await api.patch(`/requirement-analysis/prompts/${id}/`, data);
-    return response;
-  } catch (error) {
-    console.error('Failed to update prompt config:', error);
-    throw error;
-  }
-};
-
-export const deletePromptConfig = async (id) => {
-  try {
-    const response = await api.delete(`/requirement-analysis/prompts/${id}/`);
-    return response;
-  } catch (error) {
-    console.error('Failed to delete prompt config:', error);
-    throw error;
-  }
-};
-
 export const loadDefaultPrompts = async () => {
   try {
     const response = await api.get('/requirement-analysis/prompts/load_defaults/');
@@ -345,80 +151,6 @@ export const loadDefaultPrompts = async () => {
     console.error('Failed to load default prompts:', error);
     throw error;
   }
-};
-
-// 生成配置
-export const getGenerationConfigs = async (params = {}) => {
-  try {
-    const response = await api.get('/requirement-analysis/generation-config/', { params });
-    return response;
-  } catch (error) {
-    console.error('Failed to get generation configs:', error);
-    throw error;
-  }
-};
-
-export const createGenerationConfig = async (data) => {
-  try {
-    const response = await api.post('/requirement-analysis/generation-config/', data);
-    return response;
-  } catch (error) {
-    console.error('Failed to create generation config:', error);
-    throw error;
-  }
-};
-
-export const updateGenerationConfig = async (id, data) => {
-  try {
-    const response = await api.patch(`/requirement-analysis/generation-config/${id}/`, data);
-    return response;
-  } catch (error) {
-    console.error('Failed to update generation config:', error);
-    throw error;
-  }
-};
-
-export const deleteGenerationConfig = async (id) => {
-  try {
-    const response = await api.delete(`/requirement-analysis/generation-config/${id}/`);
-    return response;
-  } catch (error) {
-    console.error('Failed to delete generation config:', error);
-    throw error;
-  }
-};
-
-export const enableGenerationConfig = async (id) => {
-  try {
-    const response = await api.post(`/requirement-analysis/generation-config/${id}/enable/`);
-    return response;
-  } catch (error) {
-    console.error('Failed to enable generation config:', error);
-    throw error;
-  }
-};
-
-// 用例模板（版本）
-export const getCaseTemplates = async (params = {}) => {
-  const response = await api.get('/requirement-analysis/case-templates/', { params });
-  return response;
-};
-
-export const createCaseTemplate = async (data) => {
-  const response = await api.post('/requirement-analysis/case-templates/', data);
-  return response;
-};
-
-export const updateCaseTemplate = async (id, data) => {
-  const response = await api.patch(`/requirement-analysis/case-templates/${id}/`, data);
-  return response;
-};
-
-export const getCaseTemplateDiff = async (sourceId, targetId) => {
-  const response = await api.get('/requirement-analysis/case-templates/diff/', {
-    params: { source_id: sourceId, target_id: targetId }
-  });
-  return response;
 };
 
 // AI用例编写配置
@@ -442,11 +174,6 @@ export const enableWriterConfig = async (id) => {
   return response;
 };
 
-export const testWriterGeneration = async (id, data) => {
-  const response = await api.post(`/requirement-analysis/writer-config/${id}/test_generation/`, data);
-  return response;
-};
-
 // AI用例评审配置
 export const getReviewerConfigs = async (params = {}) => {
   const response = await api.get('/requirement-analysis/reviewer-config/', { params });
@@ -465,11 +192,6 @@ export const updateReviewerConfig = async (id, data) => {
 
 export const enableReviewerConfig = async (id) => {
   const response = await api.post(`/requirement-analysis/reviewer-config/${id}/enable/`);
-  return response;
-};
-
-export const getBestReviewerPrompt = async () => {
-  const response = await api.get('/requirement-analysis/reviewer-config/best_prompt/');
   return response;
 };
 

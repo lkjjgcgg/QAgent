@@ -10,7 +10,6 @@ class ApiProject(models.Model):
     """API项目模型"""
     PROJECT_TYPE_CHOICES = [
         ('HTTP', 'HTTP'),
-        ('WEBSOCKET', 'WebSocket'),
     ]
 
     STATUS_CHOICES = [
@@ -66,7 +65,6 @@ class ApiRequest(models.Model):
     """API请求模型"""
     REQUEST_TYPE_CHOICES = [
         ('HTTP', 'HTTP'),
-        ('WEBSOCKET', 'WebSocket'),
     ]
 
     HTTP_METHODS = [

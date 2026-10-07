@@ -45,7 +45,7 @@ from .serializers import (
     AIModelConfigSerializer, PromptConfigSerializer, TestCaseGenerationTaskSerializer,
     GenerationConfigSerializer, AICaseTemplateSerializer, AIWriterConfigSerializer, AIReviewerConfigSerializer
 )
-from .services import RequirementAnalysisService, DocumentProcessor
+from .services import DocumentProcessor
 
 logger = logging.getLogger(__name__)
 

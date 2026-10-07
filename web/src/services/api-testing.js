@@ -52,14 +52,6 @@ export const executeTestSuite = (id, data) => {
   return api.post(`/api-testing/test-suites/${id}/execute/`, data);
 };
 
-export const executeApiRequest = (id, data) => {
-  return api.post(`/api-testing/api-requests/${id}/execute/`, data);
-};
-
-export const getExecutionResult = (id) => {
-  return api.get(`/api-testing/executions/${id}/`);
-};
-
 export const getRequestHistory = (params) => {
   return api.get('/api-testing/histories/', { params });
 };
@@ -74,10 +66,6 @@ export const batchDeleteRequestHistory = (ids) => {
 
 export const getUsers = (params) => {
   return api.get('/api-testing/users/', { params });
-};
-
-export const getOperationLogs = (params) => {
-  return api.get('/api-testing/operation-logs/', { params });
 };
 
 export const getAIServiceConfigs = (params) => {
@@ -106,18 +94,6 @@ export const searchCollections = (params) => {
 
 export const getTestSuiteDetail = (id) => {
   return api.get(`/api-testing/test-suites/${id}/`);
-};
-
-export const addRequestsToTestSuite = (suiteId, requestIds) => {
-  return api.post(`/api-testing/test-suites/${suiteId}/add-requests/`, { request_ids: requestIds });
-};
-
-export const updateTestSuiteRequest = (id, data) => {
-  return api.put(`/api-testing/test-suite-requests/${id}/`, data);
-};
-
-export const deleteTestSuiteRequest = (id) => {
-  return api.delete(`/api-testing/test-suite-requests/${id}/`);
 };
 
 export const pauseScheduledTask = (id) => {
@@ -206,10 +182,6 @@ export const updateTestSuite = (id, data) => {
 
 export const deleteTestSuite = (id) => {
   return api.delete(`/api-testing/test-suites/${id}/`);
-};
-
-export const duplicateTestSuite = (id, data) => {
-  return api.post('/api-testing/test-suites/', data);
 };
 
 export const retryRequest = (historyId, environmentId) => {

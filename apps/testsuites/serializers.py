@@ -1,13 +1,7 @@
 from rest_framework import serializers
-from .models import TestSuite, TestSuiteCase
+from .models import TestSuite
 from apps.users.serializers import UserSerializer
 from apps.projects.serializers import ProjectSimpleSerializer
-from apps.testcases.serializers import ProjectSimpleSerializer as TestCaseSimpleProjectSerializer
-
-
-class TestSuiteSimpleSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
 
 
 class TestSuiteSerializer(serializers.ModelSerializer):
@@ -51,9 +45,3 @@ class TestSuiteCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestSuite
         fields = ['name', 'description', 'project']
-
-
-class TestSuiteCaseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TestSuiteCase
-        fields = '__all__'

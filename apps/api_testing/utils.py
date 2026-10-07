@@ -2,7 +2,7 @@ import json
 import time
 from django.utils import timezone
 from .models import RequestHistory
-from .variable_resolver import VariableResolver
+from apps.core.variable_resolver import VariableResolver
 
 
 def execute_assertions(response, assertions):

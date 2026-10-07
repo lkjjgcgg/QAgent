@@ -599,17 +599,3 @@ class VariableResolver:
         """
         dt = datetime.now() + timedelta(days=days, hours=hours, minutes=minutes)
         return dt.strftime(format_str)
-
-
-# 创建全局解析器实例
-_resolver = VariableResolver()
-
-
-def resolve_variables(text):
-    """解析文本中的变量表达式
-    Args:
-        text: 包含变量表达式的文本
-    Returns:
-        解析后的文本
-    """
-    return _resolver.resolve(text)
