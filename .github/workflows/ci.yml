@@ -1,0 +1,173 @@
+name: CI
+
+# 什么时候触发：
+#   push     —— 往 main 分支推代码时
+#   pull_request —— 有人提 PR 时（防止合并进去坏代码）
+#   workflow_dispatch —— 在 GitHub 网页上手动点按钮跑一次
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# 同一个分支连续推多次时，取消掉排队中的旧任务，省额度
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================================
+  # 作业 1：静态检查
+  # 不需要数据库，几秒跑完。先让它挂了就不必浪费时间跑作业 2。
+  # ==========================================================
+  static-checks:
+    name: 静态检查（系统检查 + 迁移一致性）
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Django 系统检查
+        run: python manage.py check
+
+      # 防止「改了模型却忘了生成迁移文件」——这种问题本地跑测试发现不了，
+      # 但别人 pull 下来执行 migrate 时表结构就是旧的。
+      - name: 校验迁移文件与模型是否一致
+        run: python manage.py makemigrations --check --dry-run
+
+  # ==========================================================
+  # 作业 2：接口测试
+  # 关键点：这套测试是「黑盒接口测试」，不是 Django 单元测试 ——
+  # 它用 requests 打真实的 HTTP 地址，所以 CI 里必须：
+  #   ① 起一个真的 MySQL（用 service container）
+  #   ② 启动真的 Django 服务（runserver），等它就绪
+  #   ③ 才能跑 pytest
+  # ==========================================================
+  api-tests:
+    name: 接口测试（MySQL 8 + 真实 HTTP 服务）
+    runs-on: ubuntu-latest
+    needs: static-checks
+
+    # GitHub 会在同一个网络里起一个 MySQL 容器，供本作业连接
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: qagent
+        ports:
+          - 3306:3306
+        # 健康检查：MySQL 启动要十几秒，等它真的能 ping 通再往下走，
+        # 否则 migrate 会直接报连接失败
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+    # 这些值等价于本地 .env 的内容。
+    # CI 里没有 .env（它被 .gitignore 排除了），所以必须在这里显式给出。
+    env:
+      SECRET_KEY: ci-only-secret-not-used-in-production
+      DEBUG: "False"
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      DB_NAME: qagent
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      QAGENT_BASE_URL: http://127.0.0.1:8000
+
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 建表（执行数据库迁移）
+        run: python manage.py migrate --no-input
+
+      # Django 单元测试：跑各 app 目录下 tests.py 里的 TestCase（数据库事务随用例回滚）。
+      #
+      # 【为什么必须单独开一步，而不是靠上面的 pytest】
+      # pytest.ini 里写了 testpaths = api_tests —— 那是**有意**的，为的是让 pytest
+      # 只收集「黑盒接口测试」。副作用是 apps/*/tests.py 里的单元测试 pytest 根本不会收集。
+      # 它们要想被执行，只能交给 Django 自带的 runner（manage.py test）。
+      # 仓库里 apps/requirement_analysis/tests.py 的那 4 个用例，正是因为这一条
+      # 一直"存在但从未运行"，直到被发现其中 4 个全部失败（缺 owner 字段）。
+      - name: 跑 Django 单元测试
+        run: python manage.py test --noinput -v 2
+
+      # 服务与测试放在同一个 shell 步骤里：这样后台进程不会因为步骤结束被收走，
+      # 退出时用 trap 统一收掉，不会留下孤儿进程。
+      - name: 启动服务 → 跑接口测试
+        run: |
+          set -euo pipefail
+
+          # 日志写到 runner 的临时目录，不污染仓库工作区
+          LOG="$RUNNER_TEMP/server.log"
+
+          python manage.py runserver 127.0.0.1:8000 --noreload > "$LOG" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+
+          # 轮询等待服务就绪：未登录访问受保护接口应返回 401，
+          # 出现 401 就说明路由和鉴权中间件都起来了。
+          ready=""
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "${QAGENT_BASE_URL}/api/auth/me/" || true)
+            if [ "$code" = "401" ]; then
+              ready="yes"
+              break
+            fi
+            echo "等待服务就绪…（第 $i 次探测，HTTP $code）"
+            sleep 2
+          done
+
+          if [ -z "$ready" ]; then
+            echo "❌ 服务未能在 60 秒内就绪，服务日志如下："
+            cat "$LOG"
+            exit 1
+          fi
+          echo "✅ 服务已就绪，开始跑测试"
+
+          pytest api_tests -v --alluredir=allure-results
+
+      - name: 上传 Allure 测试结果
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: 测试失败时打印服务端日志
+        if: failure()
+        run: |
+          echo "===== Django 服务端日志 ====="
+          cat "$RUNNER_TEMP/server.log" || true

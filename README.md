@@ -4,6 +4,7 @@
 
 **基于 AI 驱动的全栈测试管理平台**
 
+[![CI](https://github.com/lkjjgcgg/QAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/lkjjgcgg/QAgent/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-4.2-green.svg)](https://www.djangoproject.com/)
 [![React](https://img.shields.io/badge/React-19.2-blue.svg)](https://reactjs.org/)
@@ -14,7 +15,7 @@
 
 ## 📖 项目简介
 
-QAgent 是一个功能强大的智能自动测试平台，集成了 AI 需求分析、测试用例生成、API 自动化测试、UI 自动化测试、测试用例管理、评审、执行和报告等完整功能。
+QAgent 是一个智能自动化测试平台，集成了 AI 需求分析、测试用例生成、API 自动化测试、测试用例管理、评审、执行和报告等完整功能。
 
 <div align="center">
   <img src=".github/images/111.png" alt="QAgent 界面截图" width="100%">
@@ -27,8 +28,7 @@ QAgent 是一个功能强大的智能自动测试平台，集成了 AI 需求分
 ### AI 智能化能力
 - **AI 需求分析**: 自动解析需求文档（PDF/Word/TXT），智能提取业务需求
 - **智能测试用例生成**: 基于需求自动生成测试用例，支持多种测试类型
-- **多模型支持**: 支持 DeepSeek、通义千问、硅基流动、OpenAI、Anthropic、Google Gemini 等多种 AI 模型
-- **AI 驱动 UI 自动化**: 基于 browser-use 和 LangChain，实现智能化浏览器自动化
+- **多模型支持**: 兼容 OpenAI 接口协议，可接入 DeepSeek、通义千问、硅基流动等任意兼容服务，模型配置与切换在平台内完成
 
 ### 智能测试 Agent
 - **ReAct 智能引擎**: 基于 ReAct 框架，支持 Thought → Action → Observation 循环推理
@@ -44,10 +44,9 @@ QAgent 是一个功能强大的智能自动测试平台，集成了 AI 需求分
 - **请求队列**: Token 刷新期间请求自动排队等待，确保请求不丢失
 
 ### 统一配置中心
-- **环境检测**: 自动检测系统浏览器和 Playwright 环境
-- **驱动管理**: 一键安装和更新浏览器驱动
-- **AI 模型配置**: 统一管理多种 AI 模型的 API 配置
+- **AI 模型配置**: 统一管理多种 AI 模型的服务类型、模型名、密钥与接口地址
 - **连接测试**: 支持 AI 模型连接测试和验证
+- **通知配置**: 统一管理邮件 / Webhook 机器人通知
 
 ### 测试用例管理
 - **完整的用例生命周期管理**: 创建、编辑、版本控制、归档
@@ -62,7 +61,7 @@ QAgent 是一个功能强大的智能自动测试平台，集成了 AI 需求分
 - **评审模板**: 可自定义评审检查清单和默认评审人
 
 ### API 测试
-- **项目和集合管理**: 支持 HTTP/WebSocket 协议，树形结构组织 API
+- **项目和集合管理**: 支持 HTTP 协议，树形结构组织 API
 - **请求管理**: 支持 GET/POST/PUT/DELETE/PATCH/HEAD/OPTIONS 等多种 HTTP 方法
 - **环境变量**: 全局和局部环境变量管理，支持变量替换
 - **测试套件**: 批量执行 API 请求，支持断言和执行顺序配置
@@ -92,21 +91,16 @@ QAgent 是一个功能强大的智能自动测试平台，集成了 AI 需求分
 - **API 文档**: drf-spectacular (Swagger/ReDoc)
 - **安全认证**: JWT (rest_framework_simplejwt) + Token 黑名单
 - **后台管理**: Django SimpleUI
-- **异步任务**: Celery + Redis
-- **实时推送**: Django Channels + Daphne + Redis
-- **AI 集成**:
-  - browser-use: AI 驱动的浏览器自动化
-  - langchain-openai: LLM 集成框架
-  - 多模型支持：OpenAI、Anthropic、Google Gemini、DeepSeek、硅基流动等
-- **自动化测试**: Selenium, Playwright, Airtest, Allure
-- **HTTP 客户端**: httpx (异步 HTTP)
-- **定时任务**: Django APScheduler
-- **OCR 支持**: EasyOCR + OpenCV
-- **PDF/Word 处理**: PyPDF2, python-docx
+- **AI 集成**: 通过 httpx 直连 OpenAI 兼容接口，不依赖各家官方 SDK；模型服务（DeepSeek / 通义千问 / 硅基流动等）在平台配置中心统一管理
+- **HTTP 客户端**: httpx
+- **定时任务**: 轮询式调度器（Django 管理命令 `run_all_scheduled_tasks`，需手动启动进程）
+- **接口自动化测试**: pytest + Allure
+- **文档解析**: PyPDF2, python-docx
 
 ### 前端技术栈
 - **框架**: React 19.2 + React Router DOM 7.14
 - **UI 组件**: Ant Design 6.3
+- **设计系统**: 基于 `web/DESIGN.md` 的设计令牌层（`src/theme/tokens.js` 为唯一色值来源，经 `src/theme/antdTheme.js` 映射到 Ant Design 主题，`npm run check:theme` 可校验令牌生效性）
 - **状态管理**: Redux Toolkit 2.11 + React Redux 9.2
 - **构建工具**: Vite 8.0
 - **HTTP 客户端**: Axios 1.15
@@ -116,6 +110,53 @@ QAgent 是一个功能强大的智能自动测试平台，集成了 AI 需求分
 - **日期处理**: Day.js 1.11
 - **工具库**: Lodash 4.18
 
+## 🧪 自动化测试与 CI
+
+项目包含三层测试：
+
+- **后端单元测试**（各 app 的 `tests.py`，Django `TestCase`）——直接操作模型层，验证字段、默认值与约束，随用例事务回滚
+- **后端接口测试**（`api_tests/`，pytest + requests + Allure）——黑盒打真实 HTTP 接口，覆盖注册、登录、用户流程与越权（IDOR）
+- **前端单元测试**（`web/src/**/*.test.js`，Vitest + jsdom）——覆盖 axios 拦截器（自动注入令牌、401 刷新令牌并重放原请求）、Redux 登录态持久化与令牌过期判断、设计令牌工具函数
+
+### CI 流水线（`.github/workflows/ci.yml`）
+
+每次 push / PR 自动触发，包含两个作业：
+
+| 作业 | 做什么 | 说明 |
+|---|---|---|
+| `static-checks` | `manage.py check` + `makemigrations --check` | 后者可拦截「改了模型忘了生成迁移文件」这类本地测试发现不了的问题 |
+| `api-tests` | 起 MySQL 8 容器 → `migrate` → `manage.py test`（单元测试）→ 启动真实服务 → `pytest`（接口测试） | 接口测试是黑盒的，因此 CI 里跑的是**真实的端到端链路**；单元测试用独立测试库，与接口测试互不影响 |
+
+> 前端单元测试（`web/`）目前在本地通过 `npm test` 运行，尚未接入 CI。
+
+### 测试设计要点
+
+- **两条收集链路各管一段**：`pytest.ini` 里 `testpaths = api_tests`，pytest 只收接口测试；各 app 的单元测试交给 Django 自带的 `manage.py test`。两者都必须在 CI 里显式执行——仓库里 `apps/requirement_analysis/tests.py` 的 4 个用例曾因缺少后者而长期未被执行（且实际上全部失败）却无人发现
+- **数据自清理**：用例通过 fixture 登记自己造的账号，跑完自动删除，不污染数据库
+- **无隐式依赖**：基准数据由 `conftest.py` 的 session 级 fixture 幂等创建，空数据库上也能跑通
+- **地址可配置**：被测服务地址集中在 `api_tests/qa_config.py`，用 `QAGENT_BASE_URL` 环境变量覆盖
+- **安全回归用例**：`test_security.py` 覆盖越权访问（IDOR），采用「实验组 + 对照组 + 取证 + 正向用例防误伤」的设计
+
+### 本地运行
+
+```bash
+# 后端单元测试（不需要启动服务，会自动建/销毁测试库）
+python manage.py test
+
+# 后端接口测试：先启动服务（另开一个终端）
+python manage.py runserver
+pytest api_tests -v
+
+# 可选：生成 Allure 报告
+pytest api_tests --alluredir=allure-results
+allure generate allure-results -o allure-report --clean
+
+# 前端单元测试（在 web/ 目录下，不需要后端服务）
+cd web
+npm test            # 跑一次
+npm run test:watch  # 监听文件变化，改完自动重跑
+```
+
 ## 快速开始
 
 ### 环境要求
@@ -123,9 +164,7 @@ QAgent 是一个功能强大的智能自动测试平台，集成了 AI 需求分
 - **Python**: 推荐 Python 3.12，其他版本可能会存在兼容性问题
 - **Node.js**: 18+ (开发环境必须安装 Node.js 用于构建前端项目，生产可不安装)
 - **MySQL**: 8.0+ (必须安装 MySQL 客户端，用于执行数据库迁移等操作)
-- **Java**: 17+ (可选，用于运行浏览器驱动、Allure 报告生成等，否则会生成报告失败)
-- **Redis**: 6.0+ (可选，用于 APP 自动化测试、异步任务和 WebSocket 推送等)
-- **浏览器驱动**: ChromeDriver / GeckoDriver (用于 UI 自动化，建议提前下载好)
+- **Java**: 17+ (可选，仅用于生成 Allure 测试报告，未安装则无法生成报告)
 
 ### 后端部署
 

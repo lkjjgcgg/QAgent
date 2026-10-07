@@ -13,9 +13,12 @@ class RequirementAnalysisTestCase(TestCase):
             email='test@example.com',
             password='testpass123'
         )
+        # 注意：Project.owner 是必填外键（模型里没有 null=True），
+        # 建项目时必须指定负责人，否则会抛 IntegrityError: Column 'owner_id' cannot be null。
         self.project = Project.objects.create(
             name='Test Project',
-            description='A test project'
+            description='A test project',
+            owner=self.user,
         )
 
     def test_requirement_document_creation(self):
