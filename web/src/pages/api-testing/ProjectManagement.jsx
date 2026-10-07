@@ -165,7 +165,7 @@ const ProjectManagement = () => {
       key: 'project_type',
       width: 120,
       render: (type) => (
-        <Tag color={type === 'HTTP' ? 'blue' : 'green'}>{type}</Tag>
+        <Tag color="blue">{type}</Tag>
       )
     },
     {
@@ -291,7 +291,6 @@ const ProjectManagement = () => {
           <Form.Item name="project_type" label="项目类型">
             <Select>
               <Select.Option value="HTTP">HTTP</Select.Option>
-              <Select.Option value="WEBSOCKET">WebSocket</Select.Option>
             </Select>
           </Form.Item>
 
@@ -365,7 +364,7 @@ const ProjectManagement = () => {
               {viewingProject.description || '-'}
             </Descriptions.Item>
             <Descriptions.Item label="项目类型">
-              <Tag color={viewingProject.project_type === 'HTTP' ? 'blue' : 'green'}>
+              <Tag color="blue">
                 {viewingProject.project_type}
               </Tag>
             </Descriptions.Item>

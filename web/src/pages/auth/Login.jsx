@@ -1,12 +1,26 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Checkbox, Alert, Space, Card, Typography } from 'antd';
+import { Form, Input, Button, Checkbox, Alert } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from '../../locales';
 import { login } from '../../store/userSlice';
 import api from '../../services/api';
+import AuthShell, { AuthFooter } from '../../components/AuthShell.jsx';
+import { fontSize, spacing } from '../../theme/tokens.js';
 
-const { Title, Paragraph } = Typography;
+/**
+ * 登录页
+ * =============================================================================
+ * 改造点（对照 web/DESIGN.md）：
+ *   1. 背景从硬编码的 #f0f2f5 换成设计体系里的羊皮纸白 --q-canvas-parchment
+ *   2. 表单控件提到 size="large"（44px 高），对齐 DESIGN.md 规定的最小点击区域
+ *   3. 主按钮改成**胶囊形**（shape="round"）—— DESIGN.md 说胶囊就是"这是操作"的信号
+ *   4. 标题去掉 antd 默认的 Title 组件，改用 600 字重 + 负字距的自定义标题
+ *   5. 输入框加前置图标，降低识别成本
+ *
+ * 业务逻辑（dispatch(login) / 跳转）保持原样没动。
+ */
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -32,77 +46,56 @@ const Login = () => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#f0f2f5'
-    }}>
-      <Card style={{ width: 400, padding: '24px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <Title level={3}>QAgent</Title>
-          <Paragraph>{t('auth.login')}</Paragraph>
-        </div>
+    <AuthShell title={t('auth.login')} subtitle={t('auth.loginSubtitle')} footer={<AuthFooter>{t('auth.copyright')}</AuthFooter>}>
+      {error && (
+        <Alert
+          message={error}
+          type="error"
+          showIcon
+          style={{ marginBottom: spacing.md }}
+        />
+      )}
 
-        {error && (
-          <Alert
-            message={error}
-            type="error"
-            style={{ marginBottom: '16px' }}
-            showIcon
+      <Form name="login" initialValues={{ remember: true }} onFinish={onFinish} size="large">
+        <Form.Item name="username" rules={[{ required: true, message: t('auth.username') }]}>
+          <Input prefix={<UserOutlined />} placeholder={t('auth.username')} autoComplete="username" />
+        </Form.Item>
+
+        <Form.Item name="password" rules={[{ required: true, message: t('auth.password') }]}>
+          <Input.Password
+            prefix={<LockOutlined />}
+            placeholder={t('auth.password')}
+            autoComplete="current-password"
           />
-        )}
+        </Form.Item>
 
-        <Form
-          name="login"
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-        >
-          <Form.Item
-            name="username"
-            rules={[{ required: true, message: t('auth.username') }]}
-          >
-            <Input placeholder={t('auth.username')} />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: t('auth.password') }]}
-          >
-            <Input.Password placeholder={t('auth.password')} />
-          </Form.Item>
-
-          <Form.Item>
+        {/* 「记住我 / 忘记密码」同一行左右分布 */}
+        <Form.Item style={{ marginBottom: spacing.lg }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox>{t('auth.rememberMe')}</Checkbox>
             </Form.Item>
-
-            <Link to="#" style={{ float: 'right' }}>
+            <Link to="#" className="q-link" style={{ fontSize: fontSize.base }}>
               {t('auth.forgotPassword')}
             </Link>
-          </Form.Item>
+          </div>
+        </Form.Item>
 
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              style={{ width: '100%' }}
-              loading={loading}
-            >
-              {t('auth.login')}
-            </Button>
-          </Form.Item>
+        <Form.Item style={{ marginBottom: spacing.md }}>
+          {/* 胶囊主按钮：这是 DESIGN.md 的签名形状，也是整个页面唯一的强调色落点 */}
+          <Button type="primary" htmlType="submit" shape="round" block loading={loading}>
+            {t('auth.login')}
+          </Button>
+        </Form.Item>
 
-          <Form.Item>
-            <Space style={{ width: '100%', justifyContent: 'center' }}>
-              <span>{t('auth.register')}?</span>
-              <Link to="/register">{t('auth.register')}</Link>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Card>
-    </div>
+        <div style={{ textAlign: 'center', fontSize: fontSize.base }}>
+          <span className="q-caption">{t('auth.noAccount')} </span>
+          <Link to="/register" className="q-link">
+            {t('auth.register')}
+          </Link>
+        </div>
+      </Form>
+    </AuthShell>
   );
 };
 

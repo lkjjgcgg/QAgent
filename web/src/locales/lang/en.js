@@ -73,7 +73,14 @@ export default {
     loginSuccess: 'Login Success',
     registerSuccess: 'Register Success',
     loginFailed: 'Login Failed',
-    registerFailed: 'Register Failed'
+    registerFailed: 'Register Failed',
+    loginSubtitle: 'Sign in to continue to QAgent',
+    registerSubtitle: 'Create an account to get started with QAgent',
+    noAccount: "Don't have an account?",
+    hasAccount: 'Already have an account?',
+    emailInvalid: 'Please enter a valid email address',
+    passwordMismatch: 'The two passwords do not match',
+    copyright: 'QAgent · Automation Testing Platform'
   },
   common: {
     save: 'Save',

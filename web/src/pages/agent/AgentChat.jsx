@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Layout, Input, Button, Card, List, Avatar, Typography,
-  Space, Spin, Tag, Divider, Empty, message, Tooltip, Drawer
+  Space, Spin, Tag, Divider, Empty, message, Tooltip
 } from 'antd';
 import {
   SendOutlined, RobotOutlined, UserOutlined,
@@ -9,66 +9,95 @@ import {
   DeleteOutlined, ReloadOutlined, LoadingOutlined,
   GithubOutlined
 } from '@ant-design/icons';
-import { useSelector } from 'react-redux';
 import api from '../../services/api';
+import { REPO_URL } from '../../config/site.js';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
 
 const AgentChat = () => {
-  const { user } = useSelector(state => state.user);
   const [sessions, setSessions] = useState([]);
   const [currentSessionId, setCurrentSessionId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sessionLoading, setSessionLoading] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
-  // 加载会话列表
-  const loadSessions = async () => {
-    try {
-      setSessionLoading(true);
-      const res = await api.get('/agent/sessions/');
-      setSessions(res.data.results || res.data || []);
-    } catch (err) {
-      console.error('加载会话失败', err);
-    } finally {
-      setSessionLoading(false);
-    }
+  // ── 数据获取层：只负责「发请求 + 把返回结果整理成能直接渲染的结构」──────
+  // 【为什么要把 fetchXxx 和 setState 拆开】
+  // React 有一条规则 react-hooks/set-state-in-effect：在 effect 的**同步**执行阶段
+  // 直接 setState 会引发连锁渲染（首帧画完立刻又重画），应当避免。
+  // 拆开之后，effect 里只剩"发请求"这一个动作，setState 全部发生在网络返回后的
+  // 回调里 —— 这正是该规则认可的标准写法，同时也顺手获得了下面 cancelled 守卫的能力。
+
+  /** 拉取会话列表 */
+  const fetchSessions = async () => {
+    const res = await api.get('/agent/sessions/');
+    return res.data.results || res.data || [];
   };
 
-  // 加载消息历史
-  const loadMessages = async (sessionId) => {
-    if (!sessionId) {
-      setMessages([]);
-      return;
-    }
-    try {
-      const res = await api.get(`/agent/sessions/${sessionId}/messages/`);
-      const msgs = (res.data.results || res.data || []).map(m => ({
-        id: m.id,
-        role: m.role,
-        content: m.content,
-        msg_type: m.msg_type,
-        tool_name: m.tool_name,
-        tool_params: m.tool_params,
-        tool_result: m.tool_result,
-        created_at: m.created_at,
-      }));
-      setMessages(msgs);
-    } catch (err) {
-      console.error('加载消息失败', err);
-    }
+  /** 拉取指定会话的消息，并把后端字段整理成渲染用的结构 */
+  const fetchMessages = async (sessionId) => {
+    const res = await api.get(`/agent/sessions/${sessionId}/messages/`);
+    return (res.data.results || res.data || []).map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      msg_type: m.msg_type,
+      tool_name: m.tool_name,
+      tool_params: m.tool_params,
+      tool_result: m.tool_result,
+      created_at: m.created_at,
+    }));
   };
 
+  /** 刷新会话列表（供"发送消息后新建了会话"这类非挂载场景调用） */
+  const refreshSessions = () => {
+    fetchSessions()
+      .then(setSessions)
+      .catch((err) => console.error('加载会话失败', err));
+  };
+
+  // ── 挂载时加载会话列表 ─────────────────────────────────────────────────
+  // sessionLoading 的初值已经是 true（"一挂载就要加载"是已知事实），
+  // 所以不需要再进来同步置一次 true —— 那样会白白多渲染一轮。
+  // cancelled 守卫：请求还没回来、组件就被卸载（用户切走了页面）时不再 setState，
+  // 否则 React 会警告"在已卸载组件上更新状态"。
   useEffect(() => {
-    loadSessions();
+    let cancelled = false;
+    fetchSessions()
+      .then((list) => {
+        if (!cancelled) setSessions(list);
+      })
+      .catch((err) => {
+        console.error('加载会话失败', err);
+      })
+      .finally(() => {
+        if (!cancelled) setSessionLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  // ── 切换会话时加载该会话的消息 ─────────────────────────────────────────
+  // 未选中会话（null）时直接返回：此时没有消息可拉。注意这里刻意**不**setMessages([])——
+  // 所有会把 currentSessionId 置空的地方（新建会话 / 删除会话）都已经自己清空了消息，
+  // 而 messages 初值本来就是 []。再清一次只会多渲染一轮。
   useEffect(() => {
-    loadMessages(currentSessionId);
+    if (!currentSessionId) return undefined;
+    let cancelled = false;
+    fetchMessages(currentSessionId)
+      .then((msgs) => {
+        if (!cancelled) setMessages(msgs);
+      })
+      .catch((err) => {
+        console.error('加载消息失败', err);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [currentSessionId]);
 
   useEffect(() => {
@@ -82,8 +111,7 @@ const AgentChat = () => {
       setSessions(prev => [sess, ...prev]);
       setCurrentSessionId(sess.session_id);
       setMessages([]);
-      setDrawerOpen(false);
-    } catch (err) {
+    } catch {
       message.error('创建会话失败');
     }
   };
@@ -97,7 +125,7 @@ const AgentChat = () => {
         setCurrentSessionId(null);
         setMessages([]);
       }
-    } catch (err) {
+    } catch {
       message.error('删除会话失败');
     }
   };
@@ -129,7 +157,7 @@ const AgentChat = () => {
       if (!currentSessionId) {
         setCurrentSessionId(session_id);
         // 刷新会话列表以显示新会话
-        loadSessions();
+        refreshSessions();
       }
 
       // 添加助手回复
@@ -267,7 +295,7 @@ const AgentChat = () => {
         </div>
         <div style={{ padding: '12px 16px', borderTop: '1px solid #e5e7eb' }}>
           <a
-            href="https://github.com/peter123023/QAgent"
+            href={REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
             style={{

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Card, Row, Col, Button, Input, InputNumber, Select, Space, message, Typography, ColorPicker, QRCode } from 'antd';
 import { QrcodeOutlined, DownloadOutlined, ClearOutlined } from '@ant-design/icons';
+import { REPO_URL } from '../../config/site.js';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
 const QRCodeGenerator = () => {
-  const [content, setContent] = useState('https://github.com/peter123023/QAgent');
+  const [content, setContent] = useState(REPO_URL);
   const [size, setSize] = useState(256);
   const [errorLevel, setErrorLevel] = useState('M');
   const [foreground, setForeground] = useState('#000000');

@@ -1,107 +1,352 @@
+/* =============================================================================
+ * index.css —— 全局样式基线
+ * =============================================================================
+ * 【改造说明】
+ * 这个文件原本是 Vite 脚手架的**残留模板**：紫色主色 #aa3bff、18px 基准字号、
+ * 还有一套 prefers-color-scheme 深色媒体查询。它和 Ant Design 的样式在互相打架，
+ * 而且和 web/DESIGN.md 的设计体系毫无关系。现已整体重写。
+ *
+ * 【重要】色值的唯一来源是 src/theme/tokens.js。
+ * 下面的 --q-* 变量只是它在 CSS 里的镜像，方便自定义组件引用。
+ * 改色请改 tokens.js，然后同步这里（tools/check-tokens.mjs 会校验两边是否一致）。
+ *
+ * 变量命名：q = QAgent，与 antd 自己的 --ant-* 变量区分开。
+ * ========================================================================== */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* ---------- 颜色：品牌与强调色（整套系统只有一个强调色）---------- */
+  --q-primary: #0066cc; /* Action Blue */
+  --q-primary-focus: #0071e3; /* Focus Blue：键盘焦点环 */
+  --q-primary-on-dark: #2997ff; /* Sky Link Blue：深色底上的链接 */
+  --q-on-primary: #ffffff;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* ---------- 颜色：文字 ---------- */
+  --q-ink: #1d1d1f; /* 近黑，标题与正文 */
+  --q-ink-muted-80: #333333;
+  --q-ink-muted-48: #7a7a7a;
+  --q-body-on-dark: #ffffff;
+  --q-body-muted: #cccccc;
+  --q-on-dark: #ffffff;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* ---------- 颜色：表面 ---------- */
+  --q-canvas: #ffffff;
+  --q-canvas-parchment: #f5f5f7; /* Apple 标志性米白 */
+  --q-surface-pearl: #fafafc;
+  --q-surface-tile-1: #272729;
+  --q-surface-tile-2: #2a2a2c;
+  --q-surface-tile-3: #252527;
+  --q-surface-black: #000000;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  /* ---------- 颜色：分隔线 ---------- */
+  --q-divider-soft: #f0f0f0;
+  --q-hairline: #e0e0e0;
+
+  /* ---------- 圆角阶梯（不新增中间档）---------- */
+  --q-radius-xs: 5px;
+  --q-radius-sm: 8px;
+  --q-radius-md: 11px;
+  --q-radius-lg: 18px;
+  --q-radius-pill: 9999px;
+
+  /* ---------- 间距 ---------- */
+  --q-space-xxs: 4px;
+  --q-space-xs: 8px;
+  --q-space-sm: 12px;
+  --q-space-md: 17px;
+  --q-space-lg: 24px;
+  --q-space-xl: 32px;
+  --q-space-xxl: 48px;
+  --q-space-section: 80px;
+
+  /* ---------- 字体 ---------- */
+  --q-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+  --q-font-mono: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Courier New', monospace;
+
+  --q-fs-fine: 12px;
+  --q-fs-base: 14px;
+  --q-fs-body: 17px;
+  --q-fs-tagline: 21px;
+  --q-fs-lead: 28px;
+  --q-fs-display-lg: 40px;
+
+  /* 字距：17px 以上收紧，12px 以下绝不收紧 */
+  --q-ls-display: -0.28px;
+  --q-ls-heading: -0.374px;
+  --q-ls-body: -0.224px;
+
+  /* ---------- 投影（整个系统只有一条，且只给产品图用）---------- */
+  --q-shadow-product: rgba(0, 0, 0, 0.22) 3px 5px 30px 0;
+
+  /* ---------- 布局尺寸 ---------- */
+  --q-nav-h: 52px; /* 全局导航栏（纯黑） */
+  --q-subnav-h: 48px; /* 副导航栏（羊皮纸 + 毛玻璃） */
+  --q-sider-w: 240px;
+  --q-content-max: 1440px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+/* =============================================================================
+ * 基础重置
+ * ========================================================================== */
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+/* 明确声明只支持浅色。DESIGN.md 分析的整套令牌都是为浅色底定义的，
+ * 深色块只是"色块"，不是深色模式。去掉这行浏览器会把表单控件自动染黑。 */
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
+  font-family: var(--q-font-sans);
+  font-size: var(--q-fs-base);
+  line-height: 1.5;
+  color: var(--q-ink);
+  background: var(--q-canvas-parchment);
+  /* 字体平滑：让 macOS / Windows 上的字重看起来更接近 SF Pro 的细腻度 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
-  width: 100%;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+/* 文本选中色用主色，而不是浏览器默认的蓝 */
+::selection {
+  background: rgba(0, 102, 204, 0.16);
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+/* =============================================================================
+ * 无障碍：键盘焦点环
+ * DESIGN.md 规定焦点环用 Focus Blue（比主色略亮的一档），2px 实线。
+ * 用 :focus-visible 而不是 :focus —— 前者只在**键盘**操作时出现，
+ * 鼠标点击不会弹出难看的方框。
+ * ========================================================================== */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--q-primary-focus);
+  outline-offset: 2px;
+  border-radius: var(--q-radius-xs);
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+
+/* =============================================================================
+ * 按压微交互
+ * DESIGN.md：transform: scale(0.95) 是整套系统统一的按压反馈，
+ * 而且按压时**不换色值**，靠缩放表达"按到了"。
+ * ========================================================================== */
+.ant-btn:not(:disabled):active {
+  transform: scale(0.95);
 }
-p {
+
+.ant-btn {
+  transition:
+    transform 0.16s ease,
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+
+/* =============================================================================
+ * 滚动条
+ * 后台页面表格多，默认滚动条又粗又占地方。这里收细并做成中性灰。
+ * ========================================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c7c7cc transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #c7c7cc;
+  border-radius: var(--q-radius-pill);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a6;
+}
+
+/* =============================================================================
+ * 工具类（供自定义组件 / 页面复用，避免各处再写硬编码色值）
+ * ========================================================================== */
+
+/* ---------- 版式 ---------- */
+
+/* 页面主标题：DESIGN.md 的 display-lg —— 40px / 600 / 负字距 */
+.q-display-lg {
+  font-family: var(--q-font-sans);
+  font-size: var(--q-fs-display-lg);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: var(--q-ls-display);
+  color: var(--q-ink);
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* 区块标题：DESIGN.md 的 lead —— 28px / 400 */
+.q-lead {
+  font-size: var(--q-fs-lead);
+  font-weight: 400;
+  line-height: 1.14;
+  color: var(--q-ink);
+  margin: 0;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* 小节标题：DESIGN.md 的 tagline —— 21px / 600 */
+.q-tagline {
+  font-size: var(--q-fs-tagline);
+  font-weight: 600;
+  line-height: 1.19;
+  letter-spacing: 0.231px;
+  color: var(--q-ink);
+  margin: 0;
+}
+
+/* 正文：DESIGN.md 的 body —— 17px / 400 */
+.q-body {
+  font-size: var(--q-fs-body);
+  font-weight: 400;
+  line-height: 1.47;
+  letter-spacing: var(--q-ls-body);
+  color: var(--q-ink);
+}
+
+/* 说明文字 */
+.q-caption {
+  font-size: var(--q-fs-base);
+  line-height: 1.43;
+  color: var(--q-ink-muted-48);
+}
+
+/* 深色块上的文字（全局导航栏用） */
+.q-on-dark {
+  color: var(--q-body-on-dark);
+}
+
+/* ---------- 链接 ---------- */
+
+/* 浅色底上的行内链接 */
+.q-link {
+  color: var(--q-primary);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.q-link:hover {
+  color: var(--q-primary-focus);
+  text-decoration: underline;
+}
+
+/* 深色底上的行内链接必须换成更亮的蓝，否则 Action Blue 会消失在近黑底上 */
+.q-link-on-dark {
+  color: var(--q-primary-on-dark);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.q-link-on-dark:hover {
+  color: #ffffff;
+}
+
+/* ---------- 容器 ---------- */
+
+/* 内容区最大宽度锁在 1440px，超宽屏由两侧留白吸收 */
+.q-container {
+  width: 100%;
+  max-width: var(--q-content-max);
+  margin: 0 auto;
+}
+
+/* ---------- 表面 ---------- */
+
+/* 羊皮纸底 */
+.q-surface-parchment {
+  background: var(--q-canvas-parchment);
+}
+
+/* 深色块（DESIGN.md 的 product-tile-dark） */
+.q-tile-dark {
+  background: var(--q-surface-tile-1);
+  color: var(--q-body-on-dark);
+  border-radius: 0;
+}
+
+/* 发丝线边框的卡片：靠 1px 线区分层级，不加投影 */
+.q-card {
+  background: var(--q-canvas);
+  border: 1px solid var(--q-hairline);
+  border-radius: var(--q-radius-lg);
+}
+
+/* DESIGN.md 允许的**唯一**一条投影，只给产品图 / 主视觉用 */
+.q-product-shadow {
+  box-shadow: var(--q-shadow-product);
+}
+
+/* ---------- 胶囊 ---------- */
+
+/* 主 CTA 的签名形状。用 .q-pill 包住任意元素即可获得胶囊圆角 */
+.q-pill {
+  border-radius: var(--q-radius-pill);
+}
+
+/* 搜索框也是胶囊形（DESIGN.md 指定），与 CTA 用同一套圆角语法 */
+.q-search-pill .ant-input-affix-wrapper,
+.q-search-pill .ant-input,
+.q-search-pill.ant-input-affix-wrapper,
+.q-search-pill.ant-input {
+  border-radius: var(--q-radius-pill);
+}
+
+/* =============================================================================
+ * 毛玻璃条
+ * DESIGN.md 的 sub-nav-frosted 与 floating-sticky-bar 用
+ * 「羊皮纸 80% 透明 + backdrop-filter 模糊」制造"浮在内容之上"的效果。
+ * 这是功能性效果，不是装饰，所以不违反"不用装饰性渐变/阴影"的原则。
+ * ========================================================================== */
+.q-frosted {
+  background: rgba(245, 245, 247, 0.8);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* =============================================================================
+ * 全局导航栏（纯黑）
+ * ========================================================================== */
+.q-global-nav {
+  height: var(--q-nav-h);
+  background: var(--q-surface-black);
+  color: var(--q-on-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* 顶栏里的链接用 12px 小组件级导航字（DESIGN.md 的 nav-link）*/
+.q-nav-link {
+  font-size: var(--q-fs-fine);
+  font-weight: 400;
+  letter-spacing: -0.12px;
+  color: rgba(255, 255, 255, 0.82);
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.q-nav-link:hover {
+  color: #ffffff;
 }

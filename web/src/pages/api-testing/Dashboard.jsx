@@ -190,7 +190,7 @@ const Dashboard = () => {
                 <LinkOutlined />
               </div>
               <Title level={5} style={{ color: '#262626', marginBottom: '4px', fontSize: '14px' }}>接口管理</Title>
-              <Text type="secondary" style={{ fontSize: '11px' }}>支持 HTTP/WebSocket 多种协议，可视化编辑请求参数</Text>
+              <Text type="secondary" style={{ fontSize: '11px' }}>支持 HTTP 协议，可视化编辑请求参数</Text>
             </Card>
           </Col>
           <Col span={6}>

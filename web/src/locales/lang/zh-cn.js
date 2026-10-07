@@ -73,7 +73,14 @@ export default {
     loginSuccess: '登录成功',
     registerSuccess: '注册成功',
     loginFailed: '登录失败',
-    registerFailed: '注册失败'
+    registerFailed: '注册失败',
+    loginSubtitle: '登录以继续使用 QAgent',
+    registerSubtitle: '创建账号，开始使用 QAgent',
+    noAccount: '还没有账号？',
+    hasAccount: '已有账号？',
+    emailInvalid: '请输入有效的邮箱地址',
+    passwordMismatch: '两次输入的密码不一致',
+    copyright: 'QAgent · 自动化测试平台'
   },
   common: {
     save: '保存',
